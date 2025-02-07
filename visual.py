@@ -5,7 +5,7 @@ from scipy.stats import norm
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from blackScholes import BlackScholes
 #######################
 # Page configuration
 st.set_page_config(
@@ -33,27 +33,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Black-Scholes Model
-class BlackScholes:
-    def __init__(self, time_to_maturity, strike, current_price, volatility, interest_rate):
-        self.T = time_to_maturity
-        self.K = strike
-        self.S = current_price
-        self.sigma = volatility
-        self.r = interest_rate
-
-    def calculate_prices(self):
-        d1 = (np.log(self.S / self.K) + (self.r + 0.5 * self.sigma ** 2) * self.T) / (self.sigma * np.sqrt(self.T))
-        d2 = d1 - self.sigma * np.sqrt(self.T)
-        call_price = self.S * norm.cdf(d1) - self.K * np.exp(-self.r * self.T) * norm.cdf(d2)
-        put_price = self.K * np.exp(-self.r * self.T) * norm.cdf(-d2) - self.S * norm.cdf(-d1)
-        return call_price, put_price
-
 # Sidebar Inputs
 with st.sidebar:
-    st.title("📊 Black-Scholes Model")
-    st.write("Created by:")
-    st.markdown('[![LinkedIn](https://cdn-icons-png.flaticon.com/512/174/174857.png)](https://www.linkedin.com/in/mprudhvi/)')
+    st.title("Black-Scholes Model")
 
     current_price = st.number_input("Current Asset Price", value=100.0)
     strike = st.number_input("Strike Price", value=100.0)
@@ -72,7 +54,8 @@ with st.sidebar:
 
 # Compute Prices
 bs_model = BlackScholes(time_to_maturity, strike, current_price, volatility, interest_rate)
-call_price, put_price = bs_model.calculate_prices()
+call_price = bs_model.call_price
+put_price = bs_model.put_price
 
 # Display Prices
 col1, col2 = st.columns([1,1])
