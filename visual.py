@@ -37,7 +37,7 @@ st.markdown("""
 st.markdown(
     """
     <div style="text-align: center; margin-top: 20px;">
-        <strong>Created by <a href="https://www.linkedin.com/in/your-linkedin-profile/" target="_blank">Your Name</a></strong>
+        <strong>Created by <a href="https://www.linkedin.com/in/tusharsoodd/" target="_blank">Your Name</a></strong>
     </div>
     """,
     unsafe_allow_html=True,
