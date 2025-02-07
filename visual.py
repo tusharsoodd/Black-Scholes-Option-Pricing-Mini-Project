@@ -93,11 +93,18 @@ def compute_option_prices_vectorized(spot_range, vol_range, time_to_maturity, st
 # Heatmap Plot Function
 def plot_heatmap(data, spot_range, vol_range, title):
     fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(data, xticklabels=np.round(spot_range, 2), yticklabels=np.round(vol_range, 2), annot=True, fmt=".2f", cmap="viridis", ax=ax)
+    sns.heatmap(data, 
+                xticklabels=np.round(spot_range, 2), 
+                yticklabels=np.round(vol_range, 2), 
+                annot=True, 
+                fmt=".2f", 
+                cmap="RdYlGn",  # Red for low, Yellow for mid, Green for high
+                ax=ax)
     ax.set_title(title)
     ax.set_xlabel("Spot Price")
     ax.set_ylabel("Volatility")
     return fig
+
 
 # Compute Heatmap Data
 call_prices, put_prices = compute_option_prices_vectorized(spot_range, vol_range, time_to_maturity, strike, interest_rate)
