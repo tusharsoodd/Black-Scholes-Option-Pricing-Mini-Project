@@ -33,6 +33,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# LinkedIn link
+st.markdown(
+    """
+    <div style="text-align: center; margin-top: 20px;">
+        <strong>Created by <a href="https://www.linkedin.com/in/your-linkedin-profile/" target="_blank">Your Name</a></strong>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
 # Sidebar Inputs
 with st.sidebar:
     st.title("Black-Scholes Model")
