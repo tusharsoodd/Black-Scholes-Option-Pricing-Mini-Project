@@ -82,3 +82,13 @@ class BlackScholes:
     def put_rho(self):
         """Calculate Rho for put option."""
         return -self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(-self.d2)
+
+    @property
+    def call_pnl(self):
+        """Calculate P&L for call option."""
+        return self.call_price - self.purchase_price_call
+
+    @property
+    def put_pnl(self):
+        """Calculate P&L for put option."""
+        return self.put_price - self.purchase_price_put
