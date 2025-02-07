@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from BlackScholes import BlackScholes  # Assuming BlackScholes class is imported here
+from blackScholes import BlackScholes  # Assuming BlackScholes class is imported here
 
 # Set page configuration
 st.set_page_config(
