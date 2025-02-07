@@ -34,14 +34,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # LinkedIn link
-st.markdown(
+st.sidebar.markdown(
     """
     <div style="text-align: center; margin-top: 20px;">
-        <strong>Created by <a href="https://www.linkedin.com/in/tusharsoodd/" target="_blank">Your Name</a></strong>
+        <strong>Created by <a href="https://www.linkedin.com/in/tusharsoodd/" target="_blank">Tushar Sood</a></strong>
     </div>
     """,
     unsafe_allow_html=True,
 )
+
 
 
 # Sidebar Inputs
