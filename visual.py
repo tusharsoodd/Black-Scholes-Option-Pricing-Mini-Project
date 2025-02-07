@@ -1,13 +1,8 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-from scipy.stats import norm
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
-import seaborn as sns
-from blackScholes import BlackScholes
-#######################
-# Page configuration
+from BlackScholes import BlackScholes  # Assuming BlackScholes class is imported here
+
+# Set page configuration
 st.set_page_config(
     page_title="Black-Scholes Option Pricing Model",
     page_icon="📊",
@@ -15,102 +10,102 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS for styling
-st.markdown("""
-<style>
-.metric-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px;
-    width: auto;
-    margin: 0 auto;
-}
-.metric-call { background-color: #90ee90; color: black; margin-right: 10px; border-radius: 10px; }
-.metric-put { background-color: #ffcccb; color: black; border-radius: 10px; }
-.metric-value { font-size: 1.5rem; font-weight: bold; margin: 0; }
-.metric-label { font-size: 1rem; margin-bottom: 4px; }
-</style>
-""", unsafe_allow_html=True)
+# Sidebar for user input
+st.sidebar.header("Option Inputs")
 
-# LinkedIn link
-st.sidebar.markdown(
-    """
-    <div style="text-align: center; margin-top: 20px;">
-        <strong>Created by <a href="https://www.linkedin.com/in/tusharsoodd/" target="_blank">Tushar Sood</a></strong>
-    </div>
-    """,
-    unsafe_allow_html=True,
+# User inputs for option parameters
+current_price = st.sidebar.number_input("Current Price of Underlying Asset", min_value=1.0, value=100.0, step=1.0)
+strike_price = st.sidebar.number_input("Strike Price", min_value=1.0, value=100.0, step=1.0)
+time_to_maturity = st.sidebar.number_input("Time to Maturity (in years)", min_value=0.01, value=1.0, step=0.01)
+volatility = st.sidebar.number_input("Volatility (%)", min_value=0.0, value=20.0, step=0.1)
+interest_rate = st.sidebar.number_input("Risk-Free Interest Rate (%)", min_value=0.0, value=5.0, step=0.1)
+
+# Purchase prices for call and put options
+purchase_price_call = st.sidebar.number_input("Purchase Price for Call Option", min_value=0.0, value=5.0, step=0.1)
+purchase_price_put = st.sidebar.number_input("Purchase Price for Put Option", min_value=0.0, value=5.0, step=0.1)
+
+# Initialize Black-Scholes model
+bs = BlackScholes(
+    time_to_maturity,
+    strike_price,
+    current_price,
+    volatility / 100,  # Converting percentage to decimal
+    interest_rate / 100,  # Converting percentage to decimal
+    purchase_price_call,
+    purchase_price_put
 )
 
+# Option prices and P&L
+call_price = bs.call_price
+put_price = bs.put_price
+call_pnl = bs.call_pnl
+put_pnl = bs.put_pnl
 
+# Display results
+st.title("Black-Scholes Option Pricing Model")
+st.write(f"**Current Price of Asset**: ${current_price}")
+st.write(f"**Strike Price**: ${strike_price}")
+st.write(f"**Time to Maturity**: {time_to_maturity} years")
+st.write(f"**Volatility**: {volatility}%")
+st.write(f"**Interest Rate**: {interest_rate}%")
 
-# Sidebar Inputs
-with st.sidebar:
-    st.title("Black-Scholes Model")
+# Option Prices
+st.subheader("Option Prices")
+st.write(f"**Call Option Price**: ${call_price:.2f}")
+st.write(f"**Put Option Price**: ${put_price:.2f}")
 
-    current_price = st.number_input("Current Asset Price", value=100.0)
-    strike = st.number_input("Strike Price", value=100.0)
-    time_to_maturity = st.number_input("Time to Maturity (Years)", value=1.0)
-    volatility = st.number_input("Volatility (σ)", value=0.2)
-    interest_rate = st.number_input("Risk-Free Interest Rate", value=0.05)
+# P&L Calculation
+st.subheader("Profit and Loss (P&L) for Your Options")
+st.write(f"**Call Option P&L**: ${call_pnl:.2f}")
+st.write(f"**Put Option P&L**: ${put_pnl:.2f}")
 
-    st.markdown("---")
-    spot_min = st.number_input('Min Spot Price', min_value=0.01, value=current_price*0.8, step=0.01)
-    spot_max = st.number_input('Max Spot Price', min_value=0.01, value=current_price*1.2, step=0.01)
-    vol_min = st.slider('Min Volatility for Heatmap', min_value=0.01, max_value=1.0, value=volatility*0.5, step=0.01)
-    vol_max = st.slider('Max Volatility for Heatmap', min_value=0.01, max_value=1.0, value=volatility*1.5, step=0.01)
+# Visualizing the P&L as a heatmap (optional)
+import matplotlib.pyplot as plt
+import seaborn as sns
 
-    spot_range = np.linspace(spot_min, spot_max, 10)
-    vol_range = np.linspace(vol_min, vol_max, 10)
+# Create a grid of strikes and underlying prices for the heatmap
+strike_prices = np.linspace(50, 150, 100)
+underlying_prices = np.linspace(50, 150, 100)
+call_pnl_matrix = np.zeros((len(underlying_prices), len(strike_prices)))
+put_pnl_matrix = np.zeros((len(underlying_prices), len(strike_prices)))
 
-# Compute Prices
-bs_model = BlackScholes(time_to_maturity, strike, current_price, volatility, interest_rate)
-call_price = bs_model.call_price
-put_price = bs_model.put_price
+# Calculate P&L for call and put options across the grid
+for i, S in enumerate(underlying_prices):
+    for j, K in enumerate(strike_prices):
+        bs_temp = BlackScholes(
+            time_to_maturity,
+            K,
+            S,
+            volatility / 100,
+            interest_rate / 100,
+            purchase_price_call,
+            purchase_price_put
+        )
+        call_pnl_matrix[i, j] = bs_temp.call_pnl
+        put_pnl_matrix[i, j] = bs_temp.put_pnl
 
-# Display Prices
-col1, col2 = st.columns([1,1])
-col1.markdown(f"""<div class="metric-container metric-call"><div><div class="metric-label">CALL Value</div><div class="metric-value">${call_price:.2f}</div></div></div>""", unsafe_allow_html=True)
-col2.markdown(f"""<div class="metric-container metric-put"><div><div class="metric-label">PUT Value</div><div class="metric-value">${put_price:.2f}</div></div></div>""", unsafe_allow_html=True)
+# Plot Heatmap for Call Option P&L
+plt.figure(figsize=(12, 6))
+sns.heatmap(call_pnl_matrix, xticklabels=[f"{K:.2f}" for K in strike_prices], yticklabels=[f"{S:.2f}" for S in underlying_prices], cmap="RdYlGn", annot=True, fmt=".2f")
+plt.title("Call Option P&L Heatmap")
+plt.xlabel("Strike Price")
+plt.ylabel("Underlying Asset Price")
+st.pyplot()
 
-# Heatmap Function
-def compute_option_prices_vectorized(spot_range, vol_range, time_to_maturity, strike, interest_rate):
-    spot_grid, vol_grid = np.meshgrid(spot_range, vol_range)
-    d1 = (np.log(spot_grid / strike) + (interest_rate + 0.5 * vol_grid**2) * time_to_maturity) / (vol_grid * np.sqrt(time_to_maturity))
-    d2 = d1 - vol_grid * np.sqrt(time_to_maturity)
+# Plot Heatmap for Put Option P&L
+plt.figure(figsize=(12, 6))
+sns.heatmap(put_pnl_matrix, xticklabels=[f"{K:.2f}" for K in strike_prices], yticklabels=[f"{S:.2f}" for S in underlying_prices], cmap="RdYlGn", annot=True, fmt=".2f")
+plt.title("Put Option P&L Heatmap")
+plt.xlabel("Strike Price")
+plt.ylabel("Underlying Asset Price")
+st.pyplot()
 
-    call_prices = spot_grid * norm.cdf(d1) - strike * np.exp(-interest_rate * time_to_maturity) * norm.cdf(d2)
-    put_prices = strike * np.exp(-interest_rate * time_to_maturity) * norm.cdf(-d2) - spot_grid * norm.cdf(-d1)
-
-    return call_prices, put_prices
-
-# Heatmap Plot Function
-def plot_heatmap(data, spot_range, vol_range, title):
-    fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(data, 
-                xticklabels=np.round(spot_range, 2), 
-                yticklabels=np.round(vol_range, 2), 
-                annot=True, 
-                fmt=".2f", 
-                cmap="RdYlGn",  # Red for low, Yellow for mid, Green for high
-                ax=ax)
-    ax.set_title(title)
-    ax.set_xlabel("Spot Price")
-    ax.set_ylabel("Volatility")
-    return fig
-
-
-# Compute Heatmap Data
-call_prices, put_prices = compute_option_prices_vectorized(spot_range, vol_range, time_to_maturity, strike, interest_rate)
-
-# Display Heatmaps
-st.title("Options Price - Interactive Heatmap")
-st.info("Explore how option prices fluctuate with varying 'Spot Prices and Volatility' levels.")
-
-col1, col2 = st.columns([1,1])
-col1.subheader("Call Price Heatmap")
-col1.pyplot(plot_heatmap(call_prices, spot_range, vol_range, "CALL"))
-
-col2.subheader("Put Price Heatmap")
-col2.pyplot(plot_heatmap(put_prices, spot_range, vol_range, "PUT"))
+# Footer with LinkedIn link
+st.sidebar.markdown(
+    """
+    <hr>
+    <center>
+        Created by [Your Name](https://www.linkedin.com/in/your-linkedin-profile)
+    </center>
+    """, unsafe_allow_html=True
+)
