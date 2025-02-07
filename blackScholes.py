@@ -10,12 +10,16 @@ class BlackScholes:
         current_price: float,
         volatility: float,
         interest_rate: float,
+        purchase_price_call: float = 0.0,  # Purchase price for call
+        purchase_price_put: float = 0.0,   # Purchase price for put
     ):
         self.T = time_to_maturity
         self.K = strike
         self.S = current_price
         self.sigma = volatility
         self.r = interest_rate
+        self.purchase_price_call = purchase_price_call
+        self.purchase_price_put = purchase_price_put
 
     @property
     def d1(self):
